@@ -10,7 +10,7 @@ import os
 
 from fireworks import Workflow, LaunchPad
 
-from matmethods.vasp.fireworks.core import StaticFW
+from matmethods.vasp.fireworks.core import StaticFW, NonSCFFW
 
 
 def get_wf_ferroelectric(structure, vasp_cmd=None, db_file=None):
@@ -33,6 +33,7 @@ def get_wf_ferroelectric(structure, vasp_cmd=None, db_file=None):
     fws = []
 
     fws.append(StaticFW(structure=structure, vasp_cmd=vasp_cmd, db_file=db_file))
+    fws.append(NonSCFFW(structure=structure, vasp_cmd=vasp_cmd, db_file=db_file, parents=fws[0]))
 
     wfname = "{}:{}".format(structure.composition.reduced_formula, "dipole_moment")
 
