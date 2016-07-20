@@ -1,0 +1,3 @@
+# A ferroelectric workflow
+fireworks:
+- fw: matmethods.vasp.fireworks.core.OptimizeFW
