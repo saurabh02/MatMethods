@@ -8,9 +8,52 @@ This module defines the ferroelectric workflow
 
 import os
 
-from fireworks import Workflow, LaunchPad
+from fireworks import Workflow, LaunchPad, FireTaskBase, FWAction, Firework
+from fireworks.utilities.fw_utilities import explicit_serialize
 
 from matmethods.vasp.fireworks.core import StaticFW, NonSCFFW
+from matmethods.vasp.firetasks.glue_tasks import CopyVaspOutputs
+
+from pymatgen.io.vasp.outputs import Vasprun
+
+
+@explicit_serialize
+class BandGapCheck(FireTaskBase):
+
+    _fw_name = "BandGapCheck"
+
+    def run_task(self, fw_spec):
+        v = Vasprun(filename='vasprun.xml')
+        (band_gap, cbm, vbm, is_direct) = v.eigenvalue_band_properties
+        if band_gap > 0.5:
+            return FWAction(stored_data={'band_gap': band_gap})
+        else:
+            return FWAction(stored_data={'band_gap': band_gap}, defuse_workflow=True)
+
+
+class BandGapCheckFW(Firework):
+    def __init__(self, structure, name="check_bandgap", parents=None, **kwargs):
+        """
+        Standard static calculation Firework for dielectric constants
+        using DFPT.
+
+        Args:
+            structure (Structure): Input structure.
+            name (str): Name for the Firework.
+            vasp_cmd (str): Command to run vasp.
+            copy_vasp_outputs (bool): Whether to copy outputs from previous
+                run. Defaults to True.
+            db_file (str): Path to file specifying db credentials.
+            parents (Firework): Parents of this particular Firework.
+                FW or list of FWS.
+            \*\*kwargs: Other kwargs that are passed to Firework.__init__.
+        """
+        t = []
+
+        t.append(CopyVaspOutputs(calc_loc=True))
+        t.append(BandGapCheck())
+        super(BandGapCheckFW, self).__init__(t, parents=parents, name="{}-{}".format(
+            structure.composition.reduced_formula, name), **kwargs)
 
 
 def get_wf_ferroelectric(structure, vasp_cmd=None, db_file=None):
@@ -34,6 +77,7 @@ def get_wf_ferroelectric(structure, vasp_cmd=None, db_file=None):
 
     fws.append(StaticFW(structure=structure, vasp_cmd=vasp_cmd, db_file=db_file))
     fws.append(NonSCFFW(structure=structure, vasp_cmd=vasp_cmd, db_file=db_file, parents=fws[0]))
+    fws.append(BandGapCheckFW(structure=structure, parents=fws[1]))
 
     wfname = "{}:{}".format(structure.composition.reduced_formula, "dipole_moment")
 
