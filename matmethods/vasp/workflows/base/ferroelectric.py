@@ -41,9 +41,6 @@ class BandGapCheckFW(Firework):
             structure (Structure): Input structure.
             name (str): Name for the Firework.
             vasp_cmd (str): Command to run vasp.
-            copy_vasp_outputs (bool): Whether to copy outputs from previous
-                run. Defaults to True.
-            db_file (str): Path to file specifying db credentials.
             parents (Firework): Parents of this particular Firework.
                 FW or list of FWS.
             \*\*kwargs: Other kwargs that are passed to Firework.__init__.
@@ -53,6 +50,40 @@ class BandGapCheckFW(Firework):
         t.append(CopyVaspOutputs(calc_loc=True))
         t.append(BandGapCheck())
         super(BandGapCheckFW, self).__init__(t, parents=parents, name="{}-{}".format(
+            structure.composition.reduced_formula, name), **kwargs)
+
+
+@explicit_serialize
+class Interpolate(FireTaskBase):
+
+    _fw_name = "Interpolate"
+
+    def run_task(self, fw_spec):
+
+
+class InterpolateFW(Firework):
+    def __init__(self, structure, name="interpolate_poscar", parents=None, **kwargs):
+        """
+        Standard static calculation Firework for dielectric constants
+        using DFPT.
+
+        Args:
+            structure (Structure): Input structure.
+            name (str): Name for the Firework.
+            vasp_cmd (str): Command to run vasp.
+            parents (Firework): Parents of this particular Firework.
+                FW or list of FWS.
+            \*\*kwargs: Other kwargs that are passed to Firework.__init__.
+        """
+        t = []
+
+        interpolated_structures = structure.interpolate(end_structure=end_structure, nimages=10,
+                                                        interpolate_lattices=True)
+        for idx, interpolated_struct in enumerate(interpolated_structures):
+            interpolated_poscar = interpolated_struct.to(fmt="poscar", filename="POSCAR_" + idx)
+
+        t.append(CopyVaspOutputs(calc_loc=True))
+        super(InterpolateFW, self).__init__(t, parents=parents, name="{}-{}".format(
             structure.composition.reduced_formula, name), **kwargs)
 
 
@@ -78,6 +109,7 @@ def get_wf_ferroelectric(structure, vasp_cmd=None, db_file=None):
     fws.append(StaticFW(structure=structure, vasp_cmd=vasp_cmd, db_file=db_file))
     fws.append(NonSCFFW(structure=structure, vasp_cmd=vasp_cmd, db_file=db_file, parents=fws[0]))
     fws.append(BandGapCheckFW(structure=structure, parents=fws[1]))
+    fws.append(InterpolateFW(structure=structure, parents=fws[2]))
 
     wfname = "{}:{}".format(structure.composition.reduced_formula, "dipole_moment")
 
