@@ -8,7 +8,6 @@ from matmethods.vasp.vasp_powerups import add_small_gap_multiply, add_stability_
     add_wf_metadata, add_common_powerups
 from matmethods.vasp.workflows.base.core import get_wf
 from matmethods.vasp.workflows.base.elastic import get_wf_elastic_constant
-from matmethods.vasp.workflows.base.ferroelectric import get_wf_ferroelectric
 
 from pymatgen.io.vasp.sets import MPRelaxSet, MPStaticSet
 
@@ -191,35 +190,3 @@ def wf_elastic_constant(structure, c=None):
         wf = add_wf_metadata(wf, structure)
 
     return wf
-<<<<<<< HEAD
-
-
-def wf_ferroelectric(structure, c=None):
-    c = c or {}
-    vasp_cmd = c.get("VASP_CMD", VASP_CMD)
-    db_file = c.get("DB_FILE", DB_FILE)
-
-    wf = get_wf_ferroelectric(structure, vasp_cmd=vasp_cmd, db_file=db_file)
-
-    wf = add_common_powerups(wf, c)
-
-    if c.get("ADD_WF_METADATA", ADD_WF_METADATA):
-        wf = add_wf_metadata(wf, structure)
-
-    return wf
-
-
-def add_common_powerups(wf, c):
-
-    if c.get("ADD_NAMEFILE", ADD_NAMEFILE):
-        wf = add_namefile(wf)
-
-    if c.get("SCRATCH_DIR", SCRATCH_DIR):
-        wf = use_scratch_dir(wf, c.get("SCRATCH_DIR", SCRATCH_DIR))
-
-    if c.get("ADD_MODIFY_INCAR", ADD_MODIFY_INCAR):
-        wf = add_modify_incar(wf)
-
-    return wf
-=======
->>>>>>> upstream/master
