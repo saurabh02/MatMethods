@@ -58,7 +58,9 @@ class Interpolate(FireTaskBase):
 
     _fw_name = "Interpolate"
 
+    """
     def run_task(self, fw_spec):
+    """
 
 
 class InterpolateFW(Firework):
@@ -76,7 +78,7 @@ class InterpolateFW(Firework):
             \*\*kwargs: Other kwargs that are passed to Firework.__init__.
         """
         t = []
-
+        """
         interpolated_structures = structure.interpolate(end_structure=end_structure, nimages=10,
                                                         interpolate_lattices=True)
         for idx, interpolated_struct in enumerate(interpolated_structures):
@@ -85,6 +87,7 @@ class InterpolateFW(Firework):
         t.append(CopyVaspOutputs(calc_loc=True))
         super(InterpolateFW, self).__init__(t, parents=parents, name="{}-{}".format(
             structure.composition.reduced_formula, name), **kwargs)
+        """
 
 
 def get_wf_ferroelectric(structure, vasp_cmd=None, db_file=None):

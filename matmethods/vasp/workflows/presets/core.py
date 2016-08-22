@@ -2,11 +2,11 @@
 
 from __future__ import division, print_function, unicode_literals, absolute_import
 
-from matmethods.vasp.vasp_config import ADD_NAMEFILE, SCRATCH_DIR, SMALLGAP_KPOINT_MULTIPLY, \
-    ADD_MODIFY_INCAR, STABILITY_CHECK, VASP_CMD, DB_FILE, ADD_WF_METADATA
+from matmethods.vasp.vasp_config import SMALLGAP_KPOINT_MULTIPLY, STABILITY_CHECK, VASP_CMD, \
+    DB_FILE, ADD_WF_METADATA
+from matmethods.vasp.vasp_powerups import add_small_gap_multiply, add_stability_check, add_modify_incar, \
+    add_wf_metadata, add_common_powerups
 from matmethods.vasp.workflows.base.core import get_wf
-from matmethods.vasp.vasp_powerups import add_namefile, add_small_gap_multiply, use_scratch_dir, \
-    add_stability_check, add_modify_incar, add_wf_metadata
 from matmethods.vasp.workflows.base.elastic import get_wf_elastic_constant
 from matmethods.vasp.workflows.base.ferroelectric import get_wf_ferroelectric
 
@@ -191,6 +191,7 @@ def wf_elastic_constant(structure, c=None):
         wf = add_wf_metadata(wf, structure)
 
     return wf
+<<<<<<< HEAD
 
 
 def wf_ferroelectric(structure, c=None):
@@ -220,3 +221,5 @@ def add_common_powerups(wf, c):
         wf = add_modify_incar(wf)
 
     return wf
+=======
+>>>>>>> upstream/master
